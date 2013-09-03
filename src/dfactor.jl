@@ -1,9 +1,3 @@
-function locateat{T}(a::AbstractArray{T}, b::AbstractArray{T})
-    bdict = Dict(b, 1:length(b))
-    [get(bdict, i, 0) for i in a]
-end
-
-
 function DFPermute(A::DF,v::Vector{Int})
     if length(A.var)!=length(v)
         error("Permute vector's dimension mismatch!")
@@ -19,8 +13,8 @@ end
 
 function DFProduct(A::DF, B::DF)
     common_var = intersect(A.var, B.var)
-    A_common_idx = locateat(common_var, A.var)
-    B_common_idx = locateat(common_var, B.var)
+    A_common_idx = indexin(common_var, A.var)
+    B_common_idx = indexin(common_var, B.var)
     if A.card[A_common_idx] != B.card[B_common_idx]
         error("Inputs' common variables have mismatch cardinality!")
     end
@@ -30,16 +24,16 @@ function DFProduct(A::DF, B::DF)
 
     Cvar_length = length(Cvar)
 
-    mapA = locateat(A.var, Cvar)
-    mapB = locateat(B.var, Cvar)
+    mapA = indexin(A.var, Cvar)
+    mapB = indexin(B.var, Cvar)
 
     # Set the cardinality of variables in C
     Ccard = zeros(Int, Cvar_length)
     Ccard[mapA] = A.card
     Ccard[mapB] = B.card
 
-    Aarr0 = locateat(Cvar, A.var)
-    Barr0 = locateat(Cvar, B.var)
+    Aarr0 = indexin(Cvar, A.var)
+    Barr0 = indexin(Cvar, B.var)
     Aarr1 = Aarr0[Aarr0.>0]
     Barr1 = Barr0[Barr0.>0]
 
@@ -80,33 +74,33 @@ end
 
 
 function DFMarginDrop(A::DF, Remove_var::Vector{ASCIIString})
-    Remove_dims = locateat(Remove_var, A.var)
+    Remove_dims = indexin(Remove_var, A.var)
     if any(Remove_dims==0)
         error("Wrong variable!")
     end
     
     Remain_var = symdiff(A.var, Remove_var)
-    Remain_dims = locateat(Remain_var, A.var)
+    Remain_dims = indexin(Remain_var, A.var)
 
     DiscreteFactor.DFMargin(A, Remove_var, Remain_var, Remove_dims, Remain_dims)
 end
 
 
 function DFMarginKeep(A::DF, Remain_var::Vector{ASCIIString})
-    Remain_dims = locateat(Remain_var, A.var)
+    Remain_dims = indexin(Remain_var, A.var)
     if any(Remain_dims==0)
         error("Wrong variable!")
     end
 
     Remove_var = symdiff(A.var, Remain_var)
-    Remove_dims = locateat(Remove_var, A.var)
+    Remove_dims = indexin(Remove_var, A.var)
 
     DiscreteFactor.DFMargin(A, Remove_var, Remain_var, Remove_dims, Remain_dims)
 end
 
 
 function DFReduce(A::DF, Reduce_var::Vector{ASCIIString}, Reduce_idx::Vector{Int})
-    Reduce_dims = locateat(Reduce_var, A.var)
+    Reduce_dims = indexin(Reduce_var, A.var)
     if any(Reduce_dims.==0)
         error("Wrong variable!")
     end
